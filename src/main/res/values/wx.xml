@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="errcode_success">发送成功</string>
+    <string name="errcode_cancel">发送取消</string>
+    <string name="errcode_deny">发送被拒绝</string>
+    <string name="errcode_unknown">发送返回</string>
+
+
+    <string name="errcode_login_success">用户同意</string>
+    <string name="errcode_login_cancel">用户取消</string>
+    <string name="errcode_login_deny">用户拒绝授权</string>
+</resources>

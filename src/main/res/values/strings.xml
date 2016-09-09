@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">支付宝Demo</string>
+    <string name="format_yuan">%s元</string>
+    <string name="pay_result_tip">提示</string>
+
+    <string name="pay_result_success_callback_msg" formatted="false">支付成功</string>
+    <string name="pay_result_cancel_callback_msg" formatted="false">用户取消支付</string>
+    <string name="pay_result_failed_callback_msg" formatted="false">支付失败，%1$s,错误码[%2$s]</string>
+
+    <string name="wait_jump_to_pay_page">正在等待支付确认...</string>
+</resources>
