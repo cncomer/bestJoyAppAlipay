@@ -3,6 +3,7 @@ package com.bestjoy.app.pay;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.bestjoy.app.alipay.AliPayObject;
 import com.bestjoy.app.alipay.SignUtils;
@@ -17,7 +18,10 @@ public class PayObject implements Parcelable{
 	public String mPartner;
 	public String mSeller;
 	public String mOutTradeNo = "";
-	public String mRsaPrivate;
+	/**RSA(SHA1)密钥*/
+	public String mRsaPrivate = "";
+	/**RSA(SHA256)密钥*/
+	public String mRsa2Private = "";
 	public String mNotifyUrl = "";
 	public String mReturnUrl = "";
 	public String mTradeOvertime = "";
@@ -29,6 +33,9 @@ public class PayObject implements Parcelable{
 	public String mApiKey = "";
 	public String mAppId = "";
 	public String mCouponId="";
+	/**appid,这个值支付宝支付可能会需要*/
+	public String appid = "";
+
 	public String getPartner() {
 		return mPartner;
 	}
@@ -135,6 +142,13 @@ public class PayObject implements Parcelable{
 		return null;
 	}
 
+	/***
+	 * 是否有Rsa2Private
+	 * @return
+	 */
+	public boolean hasRsa2Private() {
+		return !TextUtils.isEmpty(mRsa2Private);
+	}
 	@Override
 	public int describeContents() {
 		return 0;
@@ -157,6 +171,9 @@ public class PayObject implements Parcelable{
 		dest.writeString(mAppId);
 		dest.writeString(mDetail);
 		dest.writeString(mCouponId);
+		dest.writeString(appid);
+		dest.writeString(mRsa2Private);
+
 	}
 
 	public static final Creator<PayObject> CREATOR = new Creator<PayObject>() {
@@ -185,6 +202,9 @@ public class PayObject implements Parcelable{
 		mAppId = in.readString();
 		mDetail = in.readString();
 		mCouponId = in.readString();
+
+		appid = in.readString();
+		mRsa2Private = in.readString();
 	}
 
 	public PayObject(String partner,

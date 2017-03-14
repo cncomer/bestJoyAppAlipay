@@ -18,8 +18,8 @@ import com.bestjoy.app.wxpay.utils.DES;
 import com.bestjoy.app.wxpay.utils.MD5;
 import com.bestjoy.app.wxpay.utils.MyWXUtils;
 import com.bestjoy.app.wxpay.utils.Util;
-import com.tencent.mm.sdk.modelpay.PayReq;
-import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.modelpay.PayReq;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;

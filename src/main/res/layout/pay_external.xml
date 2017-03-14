@@ -23,6 +23,7 @@
                 android:layout_marginRight="10dp"
                 android:text="商品名称:"
                 android:textColor="#777777"
+                android:visibility="invisible"
                 tools:ignore="HardcodedText" />
 
             <TextView android:id="@+id/subject"

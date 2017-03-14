@@ -8,6 +8,10 @@ import android.widget.Toast;
 import com.alipay.sdk.app.PayTask;
 import com.bestjoy.app.pay.PayObject;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 
 public class AliPayObject extends PayObject {
 	
@@ -16,6 +20,7 @@ public class AliPayObject extends PayObject {
 	public static final String  PAY_OBJECT_TAG = "AliPay";
 	public static final String PARTNER = "2088511405307200";
 	public static final String SELLER = "2922750265@qq.com";
+	private static final DateFormat PAY_REQUEST_TIME_DateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	public static final String RSA_PRIVATE = "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAOnGvf2jUfG+/r01" +
             "vLQmunYh6/VOFItnP1fZjSPRY+ePWefAQ2/zuKe71ISs+jjPqRR+xdqkNX0bdUV7" +
             "0tFzQpJVqZJKxfqCw028CcgXmbXeKe9iLBV8Od+5yqj4k3FufY6D6DFd2wLVh1YR" +
@@ -31,6 +36,8 @@ public class AliPayObject extends PayObject {
             "j1JVzeXC8epc8xevVeSTLkZTPplpu1N/4+pMNOCGhINEa4gL6FiwIBZXBw7GE8yJ" +
             "rdJeQrxEK5g7";
 	public static final String RSA_PUBLIC = "";
+
+	public String targetID = "";
 
 	/**
 	 * get the sdk version. 获取SDK版本号
@@ -98,6 +105,11 @@ public class AliPayObject extends PayObject {
 		return "sign_type=\"RSA\"";
 	}
 
+	public String getTimestamp() {
+		return PAY_REQUEST_TIME_DateFormat.format(new Date());
+	}
+
+
 	@Override
 	public int describeContents() {
 		return 0;
@@ -106,6 +118,7 @@ public class AliPayObject extends PayObject {
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		super.writeToParcel(dest, flags);
+		dest.writeString(targetID);
 	}
 	
 	public static final Parcelable.Creator<AliPayObject> CREATOR = new Parcelable.Creator<AliPayObject>() {
@@ -120,6 +133,7 @@ public class AliPayObject extends PayObject {
 
 	private AliPayObject(Parcel in) {
 		super(in);
+		targetID = in.readString();
 	}
 	
 	public AliPayObject() {
@@ -130,6 +144,7 @@ public class AliPayObject extends PayObject {
 		mReturnUrl = "";
 		mTradeOvertime = "30m";
 
+		targetID = "";
 		setPayObjectTag(PAY_OBJECT_TAG);
 	}
 

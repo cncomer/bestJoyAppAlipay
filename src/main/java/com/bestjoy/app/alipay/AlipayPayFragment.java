@@ -17,6 +17,8 @@ import com.bestjoy.app.pay.PayObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Map;
+
 
 /**
  * Created by bestjoy on 15/8/6.
@@ -49,11 +51,22 @@ public class AlipayPayFragment extends PayFragment{
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case SDK_PAY_FLAG: {
-                        if (mJumpToPayWaitDialog != null) {
-                            mJumpToPayWaitDialog.dismiss();
+//                        if (mJumpToPayWaitDialog != null) {
+//                            mJumpToPayWaitDialog.dismiss();
+//                        }
+                        PayResult payResult = null;
+                        if (msg.obj instanceof Map) {
+                            payResult = new PayResult((Map<String, String>) msg.obj);
+                        } else if (msg.obj instanceof String) {
+                            payResult = new PayResult((String) msg.obj);
                         }
-                        Result resultObj = new Result((String) msg.obj);
-                        final String resultStatus = resultObj.resultStatus;
+
+                        /**
+                         对于支付结果，请商户依赖服务端的异步通知结果。同步通知结果，仅作为支付结束的通知。
+                         */
+                        String resultInfo = payResult.result;// 同步返回需要验证的信息
+                        final String resultStatus = payResult.resultStatus;
+                        // 判断resultStatus 为9000则代表支付成功
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                         builder.setTitle(R.string.pay_result_tip);
@@ -67,7 +80,7 @@ public class AlipayPayFragment extends PayFragment{
                             if (TextUtils.equals(resultStatus, "8000")) {
                                 Log.e(TAG, "pay result:支付结果确认中");
                             }
-                            builder.setMessage(getString(R.string.pay_result_failed_callback_msg, resultObj.result, resultStatus));
+                            builder.setMessage(getString(R.string.pay_result_failed_callback_msg, resultInfo, resultStatus));
                         }
                         builder.setPositiveButton(android.R.string.ok, null);
                         builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -98,12 +111,18 @@ public class AlipayPayFragment extends PayFragment{
 
     @Override
     public void pay() {
-        if (mJumpToPayWaitDialog == null) {
-            mJumpToPayWaitDialog = new ProgressDialog(getActivity());
-            mJumpToPayWaitDialog.setMessage(getString(R.string.wait_jump_to_pay_page));
-            mJumpToPayWaitDialog.setCancelable(true);
+
+        if (!TextUtils.isEmpty(mPayObject.appid)) {
+            //如果appid不为空，我们走v2版本
+            payV2();
+            return;
         }
-        mJumpToPayWaitDialog.show();
+//        if (mJumpToPayWaitDialog == null) {
+//            mJumpToPayWaitDialog = new ProgressDialog(getActivity());
+//            mJumpToPayWaitDialog.setMessage(getString(R.string.wait_jump_to_pay_page));
+//            mJumpToPayWaitDialog.setCancelable(true);
+//        }
+//        mJumpToPayWaitDialog.show();
         String orderInfo = mPayObject.getOrderInfo();
         String sign = sign(orderInfo);
         try {
@@ -121,8 +140,52 @@ public class AlipayPayFragment extends PayFragment{
                 // 构造PayTask 对象
                 PayTask alipay = new PayTask(getActivity());
                 // 调用支付接口
-                String result = alipay.pay(payInfo);
+                String result = alipay.pay(payInfo, true);
+                Log.i("msp", result.toString());
+                Message msg = new Message();
+                msg.what = SDK_PAY_FLAG;
+                msg.obj = result;
+                mHandler.sendMessage(msg);
+            }
+        };
 
+        Thread payThread = new Thread(payRunnable);
+        payThread.start();
+    }
+
+    public void payV2() {
+//        if (mJumpToPayWaitDialog == null) {
+//            mJumpToPayWaitDialog = new ProgressDialog(getActivity());
+//            mJumpToPayWaitDialog.setMessage(getString(R.string.wait_jump_to_pay_page));
+//            mJumpToPayWaitDialog.setCancelable(true);
+//        }
+//        mJumpToPayWaitDialog.show();
+
+        /**
+         * 这里只是为了方便直接向商户展示支付宝的整个支付流程；所以Demo中加签过程直接放在客户端完成；
+         * 真实App里，privateKey等数据严禁放在客户端，加签过程务必要放在服务端完成；
+         * 防止商户私密数据泄露，造成不必要的资金损失，及面临各种安全风险；
+         *
+         * orderInfo的获取必须来自服务端；
+         */
+        Map<String, String> params = OrderInfoUtil2_0.buildOrderParamMap((AliPayObject) mPayObject);
+        String orderParam = OrderInfoUtil2_0.buildOrderParam(params);
+
+        boolean rsa2 = mPayObject.hasRsa2Private();
+
+        String privateKey = rsa2 ? mPayObject.mRsa2Private : mPayObject.mRsaPrivate;
+        String sign = OrderInfoUtil2_0.getSign(params, privateKey, rsa2);
+        final String orderInfo = orderParam + "&" + sign;
+
+        Runnable payRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                // 构造PayTask 对象
+                PayTask alipay = new PayTask(getActivity());
+                // 调用支付接口
+                Map<String, String> result = alipay.payV2(orderInfo, true);
+                Log.i("msp", result.toString());
                 Message msg = new Message();
                 msg.what = SDK_PAY_FLAG;
                 msg.obj = result;

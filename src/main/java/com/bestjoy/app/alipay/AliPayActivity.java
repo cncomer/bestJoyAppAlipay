@@ -1,12 +1,5 @@
 package com.bestjoy.app.alipay;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Random;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +14,13 @@ import android.widget.Toast;
 
 import com.alipay.sdk.app.PayTask;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Random;
+
 public class AliPayActivity extends FragmentActivity {
 
 	private static final String TAG = "AliPayActivity";
@@ -33,7 +33,7 @@ public class AliPayActivity extends FragmentActivity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case SDK_PAY_FLAG: {
-				Result resultObj = new Result((String) msg.obj);
+				PayResult resultObj = new PayResult((String) msg.obj);
 				String resultStatus = resultObj.resultStatus;
 
 				// 判断resultStatus 为“9000”则代表支付成功，具体状态码代表含义可参考接口文档
@@ -135,7 +135,7 @@ public class AliPayActivity extends FragmentActivity {
 				// 构造PayTask 对象
 				PayTask alipay = new PayTask(AliPayActivity.this);
 				// 调用支付接口
-				String result = alipay.pay(payInfo);
+				String result = alipay.pay(payInfo, true);
 
 				Message msg = new Message();
 				msg.what = SDK_PAY_FLAG;
@@ -148,30 +148,6 @@ public class AliPayActivity extends FragmentActivity {
 		payThread.start();
 	}
 
-	/**
-	 * check whether the device has authentication alipay account.
-	 * 查询终端设备是否存在支付宝认证账户
-	 * 
-	 */
-	public void check(View v) {
-		Runnable checkRunnable = new Runnable() {
-
-			@Override
-			public void run() {
-				PayTask payTask = new PayTask(AliPayActivity.this);
-				boolean isExist = payTask.checkAccountIfExist();
-
-				Message msg = new Message();
-				msg.what = SDK_CHECK_FLAG;
-				msg.obj = isExist;
-				mHandler.sendMessage(msg);
-			}
-		};
-
-		Thread checkThread = new Thread(checkRunnable);
-		checkThread.start();
-
-	}
 
 	/**
 	 * get the sdk version. 获取SDK版本号
